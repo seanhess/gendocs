@@ -16,7 +16,7 @@ cabal-version:       >=1.10
 library
   hs-source-dirs:      src
   exposed-modules:
-      Data.Validated
+      Data.Docs
     , Data.Docs.Docs
     , Data.Docs.ToMarkdown
     , Data.Docs.Sample
