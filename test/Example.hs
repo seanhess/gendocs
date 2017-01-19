@@ -5,7 +5,7 @@ module Example where
 
 import Data.Aeson (ToJSON)
 import Data.Proxy (Proxy(..))
-import Data.Docs (markdown, Docs(..), Sample(..))
+import Data.Docs (markdown, Docs(..), Sample(..), genDocs)
 import Data.Text (Text)
 import qualified Data.Text as Text
 import GHC.Generics (Generic)
@@ -27,7 +27,8 @@ instance Sample Person where
 newtype Age = Age Int
     deriving (Show, Eq, Generic)
 instance ToJSON Age
-instance Docs Age
+instance Docs Age where
+    docs = genDocs "Age in years"
 instance Sample Age where
     sample _ = Age 31
     samples _ = [Age 31, Age 24]
