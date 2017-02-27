@@ -3,7 +3,7 @@ module Data.Docs
   , Field(..)
   , Docs(..)
   , genDocs
-  , genDocsWithValues
+  , genDocsEnum
   , genValues
   , genFields
   , Sample(..)

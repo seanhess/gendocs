@@ -10,7 +10,7 @@ Example
 
     import Data.Aeson (ToJSON)
     import Data.Proxy (Proxy(..))
-    import Data.Docs (markdown, Docs(..), Sample(..), genDocs)
+    import Data.Docs (markdown, Docs(..), Sample(..), genDocs, genDocsEnum)
     import Data.Text (Text)
     import qualified Data.Text as Text
     import GHC.Generics (Generic)
@@ -41,10 +41,10 @@ Example
     data Hobby = Haskell | Friends | Movies
         deriving (Show, Eq, Generic, Enum, Bounded)
     instance ToJSON Hobby
-    instance Docs Hobby
+    instance Docs Hobby where
+        docs = genDocsEnum "Hobby"
     instance Sample Hobby where
         sample _ = Haskell
-        allValues _ = [minBound..]
 
     doc :: IO ()
     doc = do

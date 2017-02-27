@@ -9,7 +9,7 @@ module Data.Docs.Docs
   , Field(..)
   , Docs(..)
   , genDocs
-  , genDocsWithValues
+  , genDocsEnum
   , genValues
   , genFields
   ) where
@@ -58,8 +58,8 @@ genDocs d p = Documentation
     , enumeratedValues = []
     }
 
-genDocsWithValues :: forall a. (Generic a, GTypeName (Rep a), Selectors (Rep a), Bounded a, Enum a, Show a) => Text -> Proxy a -> Documentation
-genDocsWithValues d p =
+genDocsEnum :: forall a. (Generic a, GTypeName (Rep a), Selectors (Rep a), Bounded a, Enum a, Show a) => Text -> Proxy a -> Documentation
+genDocsEnum d p =
     (genDocs d p)
       { enumeratedValues = genValues p }
 
