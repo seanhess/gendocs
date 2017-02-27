@@ -9,6 +9,7 @@ module Data.Docs.Docs
   , Field(..)
   , Docs(..)
   , genDocs
+  , genDocsWithValues
   , genValues
   , genFields
   ) where
@@ -37,6 +38,7 @@ data Documentation = Documentation
     { typeName :: TypeName
     , fields :: [Field]
     , description :: Text
+    , enumeratedValues :: [Text]
     } deriving (Show, Eq)
 
 -- | Documentation for a record field
@@ -53,7 +55,13 @@ genDocs d p = Documentation
     { typeName = pack $ TypeName.typeName p
     , description = d
     , fields = genFields p
+    , enumeratedValues = []
     }
+
+genDocsWithValues :: forall a. (Generic a, GTypeName (Rep a), Selectors (Rep a), Bounded a, Enum a, Show a) => Text -> Proxy a -> Documentation
+genDocsWithValues d p =
+    (genDocs d p)
+      { enumeratedValues = genValues p }
 
 
 genFields :: forall a. (Selectors (Rep a)) => Proxy a -> [Field]

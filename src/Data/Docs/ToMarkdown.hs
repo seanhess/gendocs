@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Data.Docs.ToMarkdown where
 
-import Data.Aeson (ToJSON, toJSON, Value, encode)
+import Data.Aeson (ToJSON)
 import Data.Aeson.Encode.Pretty (encodePretty', defConfig, Config(..))
 import Data.Char (isAlphaNum)
 import Data.Data (Proxy(..))
@@ -21,22 +21,27 @@ markdown :: (ToJSON a, Docs a, Sample a) => Proxy a -> Text
 markdown p =
   let d = docs p
       s = sample p
-      vs =  allValues p
-  in Text.intercalate "\n\n" $ map (Text.intercalate "\n") $ filter (not . List.null)
-  [ header d
+  in section $ filter (not . List.null)
+  [ header (typeName d)
   , desc (description d)
   , fieldTable (fields d)
-  , valuesTable (map toJSON vs)
+  , valuesTable (enumeratedValues d)
   , example s
   ]
+
+
+section :: [[Text]] -> Text
+section = Text.intercalate "\n\n" . map Text.unlines
+
 
 desc :: Text -> [Text]
 desc "" = []
 desc d = [d]
 
-header :: Documentation -> [Text]
-header d =
-  [ typeName d
+
+header :: Text -> [Text]
+header t =
+  [ t
   , "---------------------"
   ]
 
@@ -76,12 +81,12 @@ fieldTable fs =
         else "(optional)"
 
 
-valuesTable :: [Value] -> [Text]
+valuesTable :: [Text] -> [Text]
 valuesTable [] = []
 valuesTable vs =
   table ["Values"] (map row vs)
   where
-    row t = [ Text.decodeUtf8 $ BSL.toStrict $ encode t ]
+    row t = [ t ]
 
 
 -- | Tables
