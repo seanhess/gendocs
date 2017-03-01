@@ -3,6 +3,8 @@ module Data.Docs
   , Field(..)
   , Docs(..)
   , genDocs
+  , genDocsWith
+  , FieldModifier
   , genDocsEnum
   , genValues
   , genFields

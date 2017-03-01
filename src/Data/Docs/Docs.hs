@@ -9,9 +9,11 @@ module Data.Docs.Docs
   , Field(..)
   , Docs(..)
   , genDocs
+  , genDocsWith
   , genDocsEnum
   , genValues
   , genFields
+  , FieldModifier
   ) where
 
 import Data.Text (Text, pack)
@@ -54,9 +56,19 @@ genDocs :: forall a. (Generic a, GTypeName (Rep a), Selectors (Rep a)) => Text -
 genDocs d p = Documentation
     { typeName = pack $ TypeName.typeName p
     , description = d
-    , fields = genFields p
+    , fields = genFields id p
     , enumeratedValues = []
     }
+
+
+genDocsWith :: forall a. (Generic a, GTypeName (Rep a), Selectors (Rep a)) => FieldModifier -> Text -> Proxy a -> Documentation
+genDocsWith fieldModifier d p = Documentation
+    { typeName = pack $ TypeName.typeName p
+    , description = d
+    , fields = genFields fieldModifier p
+    , enumeratedValues = []
+    }
+
 
 genDocsEnum :: forall a. (Generic a, GTypeName (Rep a), Selectors (Rep a), Bounded a, Enum a, Show a) => Text -> Proxy a -> Documentation
 genDocsEnum d p =
@@ -64,18 +76,24 @@ genDocsEnum d p =
       { enumeratedValues = genValues p }
 
 
-genFields :: forall a. (Selectors (Rep a)) => Proxy a -> [Field]
-genFields _ = map (uncurry toField . selectorToText) $ selectors (Proxy :: Proxy (Rep a))
+type FieldModifier = String -> String
+
+
+genFields :: forall a. (Selectors (Rep a)) => FieldModifier -> Proxy a -> [Field]
+genFields fieldModifier _ = map (uncurry toField . selectorToText fieldModifier) $ selectors (Proxy :: Proxy (Rep a))
 
 
 genValues :: forall a. (Enum a, Bounded a, Show a) => Proxy a -> [Text]
 genValues _ = map (pack . show) ([minBound..] :: [a])
 
 
-selectorToText :: (String, TypeRep) -> (Text, [Text])
-selectorToText (s, t) = (pack s, T.words $ pack $ show t)
+selectorToText :: FieldModifier -> (String, TypeRep) -> (String, [String])
+selectorToText fieldModifier (s, t) = (fieldModifier s, words $ show t)
 
 
-toField :: Text -> [Text] -> Field
-toField s ("Maybe":t) = Field s (T.concat t) False
-toField s t = Field s (T.concat t) True
+toField :: String -> [String] -> Field
+toField s ("Maybe":t) = field s (concat t) False
+toField s t = field s (concat t) True
+
+field :: String -> String -> Bool -> Field
+field n t o = Field (T.pack n) (T.pack t) o
